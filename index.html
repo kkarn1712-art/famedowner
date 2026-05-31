@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>FamedOwner Hosting · Dark Terminal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #0a0f1a; min-height: 100vh; color: #e0f2fe; overflow-x: hidden; }
+    .dark-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background: radial-gradient(circle at 30% 40%, #0a1a2f, #020408); overflow: hidden; }
+    .dark-wave { position: absolute; bottom: 0; left: 0; width: 200%; height: 200%; background: repeating-linear-gradient(45deg, rgba(0,150,255,0.05), rgba(0,80,150,0.08) 50%); animation: slideDark 28s infinite linear; pointer-events: none; }
+    .dark-wave2 { animation: slideDark 36s infinite reverse; background: repeating-linear-gradient(135deg, rgba(0,100,200,0.04), rgba(0,50,100,0.07)); }
+    @keyframes slideDark { 0% { transform: translateX(0) translateY(0) rotate(0deg);} 100% { transform: translateX(-30%) translateY(-10%) rotate(3deg);} }
+    .glass-dark { background: rgba(5,15,25,0.75); backdrop-filter: blur(14px); border-radius: 1.5rem; border: 1px solid rgba(0,150,255,0.3); box-shadow: 0 20px 35px -12px rgba(0,0,0,0.6); transition: all 0.2s ease; }
+    .btn-dark { background: linear-gradient(105deg, #1e3a8a, #0284c7); border: none; padding: 10px 20px; border-radius: 40px; font-weight: 700; color: white; cursor: pointer; transition: 0.2s; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(2,132,199,0.4); }
+    .btn-dark:hover { transform: scale(1.02); background: linear-gradient(105deg, #2563eb, #0ea5e9); }
+    .plan-card { background: rgba(10,20,35,0.8); backdrop-filter: blur(10px); border-radius: 1.5rem; padding: 1rem 0.75rem; transition: all 0.25s ease; border: 1px solid rgba(0,150,255,0.4); cursor: pointer; text-align: center; color: #b9e6ff; }
+    .plan-card.active { border-color: #3b82f6; background: rgba(59,130,246,0.2); box-shadow: 0 0 0 2px #3b82f680; }
+    .plan-card.disabled { opacity: 0.6; cursor: not-allowed; filter: grayscale(0.2); }
+    .console-panel { background: #03060cee; border-radius: 1.25rem; padding: 0.8rem; font-family: monospace; font-size: 0.7rem; border-left: 3px solid #0ea5e9; overflow-y: auto; max-height: 200px; color: #a5f3fc; white-space: pre-wrap; }
+    .file-label-custom { background: #0f172aee; border: 1px solid #0ea5e9; border-radius: 2rem; padding: 10px 16px; display: inline-block; width: 100%; text-align: center; cursor: pointer; transition: 0.2s; color: #bae6fd; font-size: 0.85rem; }
+    .file-label-custom:hover { background: #1e293b; border-color: #38bdf8; }
+    input[type="file"] { opacity: 0; position: absolute; width: 0.1px; height: 0.1px; }
+    .file-upload { position: relative; width: 100%; }
+    .control-group { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; justify-content: center; }
+    .control-btn { padding: 8px 18px; border-radius: 40px; font-weight: 600; border: none; cursor: pointer; font-size: 0.8rem; }
+    .btn-start { background: #22c55e; color: white; } .btn-start:hover { background: #16a34a; transform: scale(1.02);}
+    .btn-stop { background: #ef4444; color: white; } .btn-stop:hover { background: #dc2626; transform: scale(1.02);}
+    .btn-restart { background: #f59e0b; color: white; } .btn-restart:hover { background: #d97706; transform: scale(1.02);}
+    .uptime-card { background: #020617aa; backdrop-filter: blur(8px); border-radius: 2rem; padding: 10px 20px; display: inline-flex; align-items: center; gap: 12px; font-weight: bold; font-size: 1.1rem; color: #bae6fd; border: 1px solid #0ea5e9; margin-bottom: 8px; }
+    .cmd-input-group { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
+    .cmd-input { flex: 1; background: #0a0f1a; border: 1px solid #0ea5e9; border-radius: 40px; padding: 8px 14px; color: #a5f3fc; font-family: monospace; font-size: 0.75rem; outline: none; }
+    .cmd-btn { background: #1e293b; border: 1px solid #0ea5e9; border-radius: 40px; padding: 8px 16px; color: white; cursor: pointer; font-size: 0.75rem; }
+    .cmd-btn:hover { background: #0ea5e9; }
+    .ai-chat-icon { position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; background: linear-gradient(135deg, #1e3a8a, #0284c7); border-radius: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.5); z-index: 200; border: 2px solid #38bdf8; }
+    .ai-chat-icon:hover { transform: scale(1.05); background: #2563eb; }
+    .chat-window { position: fixed; bottom: 80px; right: 16px; width: 320px; height: 460px; background: #0f172ae6; backdrop-filter: blur(20px); border-radius: 1.5rem; z-index: 201; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #0ea5e9; }
+    .chat-header { background: #0c4a6e; color: white; padding: 12px 16px; font-weight: bold; display: flex; justify-content: space-between; }
+    .chat-messages-area { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .chat-input-area { display: flex; padding: 10px; gap: 6px; border-top: 1px solid #0ea5e9; background: #020617; }
+    .chat-input-area input { flex: 1; border-radius: 40px; border: 1px solid #0ea5e9; padding: 8px 12px; outline: none; background: #0a0f1a; color: white; }
+    .btn-chat-send { background: #0ea5e9; border: none; border-radius: 40px; padding: 0 16px; color: white; cursor: pointer; }
+    .hidden { display: none; }
+    .continue-btn-container { text-align: center; margin-top: 20px; }
+    .status-badge { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+    .status-online { background: #22c55e; box-shadow: 0 0 5px #22c55e; }
+    .status-offline { background: #ef4444; }
+    @media (max-width: 640px) { 
+      .glass-dark { padding: 1rem !important; } 
+      .chat-window { width: 90%; right: 5%; left: 5%; bottom: 80px; height: 70vh; }
+      .uptime-card { padding: 6px 12px; font-size: 0.9rem; }
+      .plan-card h3 { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="dark-bg"><div class="dark-wave"></div><div class="dark-wave dark-wave2"></div></div>
+
+<!-- Access Layer -->
+<div id="accessLayer" class="fixed inset-0 flex items-center justify-center z-50" style="background: #010514e6; backdrop-filter: blur(18px);">
+  <div class="glass-dark p-6 w-80 max-w-[90vw] text-center">
+    <i class="fas fa-cloud-moon text-4xl text-cyan-400 mb-2"></i>
+    <h1 class="text-2xl font-extrabold text-cyan-300">Welcome to Kengs Platform</h1>
+    <p class="text-cyan-200/80 text-sm mt-2 mb-4">FamedOwner Hosting </p>
+    <input type="text" id="telegramIdInput" placeholder="Your Telegram ID (e.g., @user or 123456)" class="w-full mb-4 py-2 px-3 rounded-full border border-cyan-500 bg-black/50 text-white text-center text-sm">
+    <button id="enterIdBtn" class="btn-dark w-full"><i class="fas fa-key mr-2"></i> Enter Terminal</button>
+  </div>
+</div>
+
+<!-- Main Dashboard -->
+<div id="mainApp" style="display: none;" class="container mx-auto px-4 py-4 max-w-6xl relative z-10">
+  <div class="text-center mb-6">
+    <h1 class="text-3xl md:text-4xl font-black bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">⚡ FAMEDOWNER HOSTING ⚡</h1>
+    <p class="text-cyan-300 text-sm mt-1">#Pratik </p>
+  </div>
+  
+  <!-- Plan Selection -->
+  <div id="planSelectionSection" class="glass-dark p-4 mb-5">
+    <h2 class="text-xl font-bold text-cyan-300 mb-3 text-center">📋 Choose Your Hosting Plan</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div id="freePlanCard" class="plan-card active">
+        <i class="fas fa-crown text-2xl text-cyan-400 mb-1"></i>
+        <h3 class="text-xl font-bold">FREE</h3>
+        <p class="text-xs text-cyan-300">Sandbox · Upload & Run</p>
+        <span class="inline-block mt-1 text-xs bg-cyan-800/60 px-2 py-0.5 rounded-full">available</span>
+      </div>
+      <div id="basicPlanCard" class="plan-card disabled">
+        <i class="fas fa-chart-line text-2xl text-gray-500 mb-1"></i>
+        <h3 class="text-xl font-bold text-gray-400">BASIC</h3>
+        <p class="text-xs text-gray-400">Extended Resources</p>
+        <span class="inline-block mt-1 text-xs bg-gray-700/60 px-2 py-0.5 rounded-full">coming soon</span>
+      </div>
+      <div id="premiumPlanCard" class="plan-card disabled">
+        <i class="fas fa-gem text-2xl text-gray-500 mb-1"></i>
+        <h3 class="text-xl font-bold text-gray-400">PREMIUM</h3>
+        <p class="text-xs text-gray-400">Ultra Performance</p>
+        <span class="inline-block mt-1 text-xs bg-gray-700/60 px-2 py-0.5 rounded-full">coming soon</span>
+      </div>
+    </div>
+    <div class="continue-btn-container">
+      <button id="continueBtn" class="btn-dark px-6 py-2 text-base"><i class="fas fa-arrow-right mr-2"></i> Continue</button>
+    </div>
+  </div>
+  
+  <!-- Bot Manager -->
+  <div id="botManagerSection" style="display: none;">
+    <div class="glass-dark p-4 transition-all">
+      <div class="flex flex-wrap justify-between items-center border-b border-cyan-500/30 pb-2 mb-4">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-terminal text-cyan-400 text-lg"></i>
+          <h2 class="text-xl font-bold text-cyan-300">⚡ FREE CONSOLE</h2>
+        </div>
+        <div class="uptime-card">
+          <i class="fas fa-stopwatch text-cyan-300"></i>
+          <span>Bot Uptime:</span>
+          <span id="uptimeDisplay">00:00:00</span>
+          <span class="status-badge" id="statusIndicator"></span>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="space-y-4">
+          <div>
+            <label class="block font-semibold mb-1 text-cyan-300 text-sm"><i class="fab fa-python"></i> <i class="fab fa-js"></i> Bot Script (.py / .js)</label>
+            <div class="file-upload">
+              <input type="file" id="botScriptFile" accept=".py,.js">
+              <label for="botScriptFile" class="file-label-custom"><i class="fas fa-cloud-upload-alt mr-2"></i> Choose bot file</label>
+            </div>
+            <p class="text-xs text-cyan-400/70 mt-1">Telegram bot (python-telegram-bot / node-telegraf)</p>
+          </div>
+          <div>
+            <label class="block font-semibold mb-1 text-cyan-300 text-sm"><i class="fas fa-file-alt"></i> requirements.txt / packages</label>
+            <div class="file-upload">
+              <input type="file" id="reqFile" accept=".txt">
+              <label for="reqFile" class="file-label-custom"><i class="fas fa-box-open mr-2"></i> Upload dependencies</label>
+            </div>
+          </div>
+          <div class="control-group">
+            <button id="startBotBtn" class="control-btn btn-start"><i class="fas fa-play mr-1"></i> Start</button>
+            <button id="stopBotBtn" class="control-btn btn-stop"><i class="fas fa-stop mr-1"></i> Stop</button>
+            <button id="restartBotBtn" class="control-btn btn-restart"><i class="fas fa-sync-alt mr-1"></i> Restart</button>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 mb-1"><i class="fas fa-terminal text-cyan-400"></i><span class="font-bold text-cyan-300 text-sm">LIVE RESULT CONSOLE</span></div>
+          <div id="liveConsole" class="console-panel h-48 overflow-auto text-xs font-mono whitespace-pre-wrap">> Ready. Upload bot & dependencies, then press START.\n</div>
+          <div class="cmd-input-group">
+            <input type="text" id="cmdInput" class="cmd-input" placeholder="Run pip install &lt;package&gt;">
+            <button id="runCmdBtn" class="cmd-btn"><i class="fas fa-terminal"></i> Run</button>
+          </div>
+          <p class="text-[10px] text-cyan-400/50 mt-1">* </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AI Chat -->
+<div id="aiChatIcon" class="ai-chat-icon"><i class="fas fa-robot text-white text-xl"></i></div>
+<div id="chatWindow" class="chat-window hidden">
+  <div class="chat-header">
+    <span><i class="fas fa-microchip mr-1"></i> AI Assistant</span>
+    <i id="closeChatBtn" class="fas fa-times cursor-pointer"></i>
+  </div>
+  <div id="chatMessagesList" class="chat-messages-area">
+    <div class="bg-cyan-900/50 p-2 rounded-xl text-xs text-cyan-100"><i class="fas fa-robot text-cyan-300 mr-1"></i> Hello! I'm your AI support. Ask me about console errors or pip issues.</div>
+  </div>
+  <div class="chat-input-area">
+    <input type="text" id="chatMessageInput" placeholder="Ask about errors...">
+    <button id="sendChatMsgBtn" class="btn-chat-send"><i class="fas fa-paper-plane"></i></button>
+  </div>
+</div>
+
+<script>
+let currentUserId = null;
+let currentFileId = null;
+let currentFileName = null;
+let botRunning = false;
+let botStartTime = null;
+let uptimeInterval = null;
+let consoleLogs = ["> FamedOwner Dark Terminal ready\n> Enter your Telegram ID to begin\n"];
+let lastConsoleError = "";
+
+const consoleDiv = document.getElementById('liveConsole');
+const uptimeDisplay = document.getElementById('uptimeDisplay');
+const statusIndicator = document.getElementById('statusIndicator');
+
+function refreshConsole() {
+  consoleDiv.innerText = consoleLogs.join('');
+  consoleDiv.scrollTop = consoleDiv.scrollHeight;
+}
+
+function addToConsole(message, isError = false) {
+  const ts = new Date().toLocaleTimeString();
+  consoleLogs.push(`[${ts}] ${isError ? "❌ ERROR: " : "✓ "}${message}\n`);
+  if (isError) lastConsoleError = message;
+  refreshConsole();
+}
+
+function updateUptime() {
+  if (botRunning && botStartTime) {
+    const sec = Math.floor((Date.now() - botStartTime) / 1000);
+    const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
+    uptimeDisplay.innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    statusIndicator.className = "status-badge status-online";
+  } else {
+    uptimeDisplay.innerText = "00:00:00";
+    statusIndicator.className = "status-badge status-offline";
+  }
+}
+
+// API Functions
+async function sendLogin(userId) {
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId })
+    });
+    return await res.json();
+  } catch (error) {
+    console.error('Login error:', error);
+    return { success: true };
+  }
+}
+
+async function uploadFile(file, type) {
+  const formData = new FormData();
+  formData.append(type === 'bot' ? 'botFile' : 'reqFile', file);
+  formData.append('userId', currentUserId);
+  
+  const endpoint = type === 'bot' ? '/api/upload-bot' : '/api/upload-requirements';
+  const res = await fetch(endpoint, { method: 'POST', body: formData });
+  const data = await res.json();
+  
+  if (data.success) {
+    addToConsole(data.message, false);
+    if (type === 'bot') {
+      currentFileId = data.fileId;
+      currentFileName = data.fileName;
+    }
+  } else {
+    addToConsole(data.error || 'Upload failed', true);
+  }
+  return data.success;
+}
+
+async function sendDeployNotification() {
+  try {
+    await fetch('/api/deploy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        userId: currentUserId, 
+        botFileName: currentFileName || 'uploaded_bot',
+        botFileId: currentFileId
+      })
+    });
+  } catch (error) {
+    console.error('Deploy notification error:', error);
+  }
+}
+
+// Event Listeners
+document.getElementById('botScriptFile').addEventListener('change', (e) => {
+  if (e.target.files[0]) uploadFile(e.target.files[0], 'bot');
+});
+
+document.getElementById('reqFile').addEventListener('change', (e) => {
+  if (e.target.files[0]) uploadFile(e.target.files[0], 'req');
+});
+
+document.getElementById('startBotBtn').addEventListener('click', async () => {
+  if (botRunning) {
+    addToConsole("Bot is already running", false);
+    return;
+  }
+  
+  if (!currentFileId) {
+    addToConsole("No bot file uploaded. Please upload a .py or .js file first", true);
+    return;
+  }
+  
+  addToConsole("🚀 Starting deployment...", false);
+  await sendDeployNotification();
+  addToConsole("✅ Bot DEPLOYED SUCCESSFULLY! Bot is LIVE.", false);
+  
+  botRunning = true;
+  botStartTime = Date.now();
+  if (!uptimeInterval) {
+    uptimeInterval = setInterval(updateUptime, 1000);
+  }
+  updateUptime();
+});
+
+document.getElementById('stopBotBtn').addEventListener('click', () => {
+  if (!botRunning) {
+    addToConsole("Bot is not running", false);
+    return;
+  }
+  botRunning = false;
+  botStartTime = null;
+  updateUptime();
+  addToConsole("🛑 Bot stopped by user.", false);
+});
+
+document.getElementById('restartBotBtn').addEventListener('click', async () => {
+  addToConsole("⟳ Restarting bot...", false);
+  if (!currentFileId) {
+    addToConsole("No bot file uploaded. Please upload a bot file first", true);
+    return;
+  }
+  botRunning = false;
+  botStartTime = null;
+  await sendDeployNotification();
+  botRunning = true;
+  botStartTime = Date.now();
+  updateUptime();
+  addToConsole("Bot restarted successfully.", false);
+});
+
+document.getElementById('runCmdBtn').addEventListener('click', () => {
+  const cmd = document.getElementById('cmdInput').value.trim();
+  if (!cmd) return;
+  addToConsole(`$ ${cmd}`, false);
+  if (cmd.toLowerCase().startsWith('pip install')) {
+    const pkg = cmd.split(' ')[2];
+    addToConsole(`⏳ Simulating pip install ${pkg}...`, false);
+    setTimeout(() => {
+      addToConsole(`✅ Package '${pkg}' installed successfully (simulated)`, false);
+    }, 800);
+  } else if (cmd.toLowerCase() === 'help') {
+    addToConsole("Available commands: pip install <package>", false);
+  } else {
+    addToConsole("Command not supported. Use 'pip install <package>'", true);
+  }
+  document.getElementById('cmdInput').value = '';
+});
+
+// Voice and UI
+function speakDeepMaleVoice(text) {
+  speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 0.8;
+  utterance.pitch = 0.5;
+  utterance.volume = 1;
+  const setVoice = () => {
+    const voices = speechSynthesis.getVoices();
+    let selected = voices.find(v => v.name.toLowerCase().includes('david') || v.name.toLowerCase().includes('google uk english male'));
+    if (!selected) selected = voices.find(v => v.lang.startsWith('en'));
+    if (selected) utterance.voice = selected;
+    speechSynthesis.speak(utterance);
+  };
+  if (speechSynthesis.getVoices().length) setVoice();
+  else speechSynthesis.onvoiceschanged = setVoice;
+}
+
+document.getElementById('enterIdBtn').addEventListener('click', async () => {
+  const userId = document.getElementById('telegramIdInput').value.trim();
+  if (!userId) {
+    alert("Please enter your Telegram ID");
+    return;
+  }
+  currentUserId = userId;
+  await sendLogin(userId);
+  document.getElementById('accessLayer').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+  speakDeepMaleVoice("Welcome to famedowner hosting");
+  addToConsole(`Access granted: ${userId}`, false);
+});
+
+document.getElementById('continueBtn').addEventListener('click', () => {
+  document.getElementById('botManagerSection').style.display = 'block';
+  addToConsole("FREE plan confirmed. You can now upload and manage your bot.", false);
+});
+
+// AI Chat
+function aiRespond(msg) {
+  if (lastConsoleError && (msg.includes("error") || msg.includes("fix") || msg.includes("help"))) {
+    return `🤖 Last error: "${lastConsoleError}"\n\n🔧 Try: pip install missing modules, check file format, then restart.`;
+  }
+  if (msg.includes("pip")) {
+    return `💡 Type "pip install <package>" in the console input below and press Run.`;
+  }
+  if (msg.includes("start") || msg.includes("deploy")) {
+    return `🚀 To deploy: Upload your .py or .js bot file, then click START.`;
+  }
+  return `💬 Ask me about errors, pip commands, or how to deploy your bot. I'm here to help!`;
+}
+
+function sendChat() {
+  const msg = document.getElementById('chatMessageInput').value.trim();
+  if (!msg) return;
+  const container = document.getElementById('chatMessagesList');
+  const userDiv = document.createElement('div');
+  userDiv.className = 'bg-blue-800/60 p-2 rounded-xl text-xs self-end max-w-[85%]';
+  userDiv.innerHTML = `<i class="fas fa-user text-blue-300 mr-1"></i> ${msg}`;
+  container.appendChild(userDiv);
+  document.getElementById('chatMessageInput').value = '';
+  setTimeout(() => {
+    const aiDiv = document.createElement('div');
+    aiDiv.className = 'bg-cyan-900/60 p-2 rounded-xl text-xs self-start max-w-[85%]';
+    aiDiv.innerHTML = `<i class="fas fa-robot text-cyan-300 mr-1"></i> ${aiRespond(msg.toLowerCase())}`;
+    container.appendChild(aiDiv);
+    container.scrollTop = container.scrollHeight;
+  }, 200);
+  container.scrollTop = container.scrollHeight;
+}
+
+document.getElementById('aiChatIcon').addEventListener('click', () => {
+  document.getElementById('chatWindow').style.display = 'flex';
+});
+document.getElementById('closeChatBtn').addEventListener('click', () => {
+  document.getElementById('chatWindow').style.display = 'none';
+});
+document.getElementById('sendChatMsgBtn').addEventListener('click', sendChat);
+document.getElementById('chatMessageInput').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') sendChat();
+});
+
+// Plan buttons
+document.getElementById('basicPlanCard').addEventListener('click', () => {
+  alert("BASIC mode is coming soon! Stay tuned for updates.");
+});
+document.getElementById('premiumPlanCard').addEventListener('click', () => {
+  alert("PREMIUM mode is coming soon! Stay tuned for updates.");
+});
+
+updateUptime();
+refreshConsole();
+</script>
+</body>
+</html>
